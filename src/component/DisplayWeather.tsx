@@ -9,13 +9,20 @@ import {
   Search,
   Sunrise,
   Sunset,
+  Bookmark,
 } from "lucide-react";
 import { MainWrapper } from "./styles";
+import { db } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../component/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface WeatherAPIResponse {
   location: {
     name: string;
     country: string;
+    lat: number;
+    lon: number;
   };
   current: {
     temp_c: number;
@@ -59,10 +66,14 @@ const App: React.FC = () => {
   const [searchCity, setSearchCity] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<string>("");
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const fetchWeather = async (query: string) => {
     setLoading(true);
     setError(null);
+    setSaveStatus("");
     try {
       const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=no&alerts=no`;
       const res = await axios.get<WeatherAPIResponse>(url);
@@ -133,6 +144,34 @@ const App: React.FC = () => {
       return <Sun className="icon-main text-yellow-500" />;
     return <Sun className="icon-main text-yellow-500" />;
   };
+  const saveCurrentLocationToFirebase = async () => {
+    if (weatherData) {
+      try {
+        const docRef = await addDoc(collection(db, "savedLocations"), {
+          name: weatherData.location.name,
+          country: weatherData.location.country,
+          latitude: weatherData.location.lat,
+          longitude: weatherData.location.lon,
+          savedAt: serverTimestamp(),
+        });
+        setSaveStatus(`'${weatherData.location.name}' saved! ID: ${docRef.id}`);
+        <h4> ${weatherData.location.name}is saved</h4>;
+      } catch (e) {
+        console.error("Error adding document to Firebase: ", e);
+        setSaveStatus("Error saving location. Please try again.");
+      }
+    } else {
+      setSaveStatus("No weather data to save.");
+    }
+  };
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (err: any) {
+      console.error("Error logging out:", err.message);
+    }
+  };
 
   return (
     <MainWrapper>
@@ -153,6 +192,9 @@ const App: React.FC = () => {
               aria-label="Search weather"
             >
               <Search className="icon-search" />
+            </button>
+            <button onClick={handleLogout} className="logout-button">
+              Sign Out
             </button>
           </div>
 
@@ -227,6 +269,19 @@ const App: React.FC = () => {
                         </p>
                       </div>
                     ))}
+                </div>
+                <div className="save-location-area">
+                  <button
+                    onClick={saveCurrentLocationToFirebase}
+                    className="save-button"
+                    aria-label="Save current location"
+                    disabled={!weatherData}
+                  >
+                    <Bookmark className="icon-save" /> Save Location
+                  </button>
+                  {saveStatus && (
+                    <p className="save-status-message">{saveStatus}</p>
+                  )}
                 </div>
 
                 <h2 className="forecast-title daily-title">

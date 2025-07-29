@@ -10,6 +10,7 @@ import Signup from "../src/component/Signup";
 import Login from "../src/component/Login";
 import Dashboard from "../src/component/Dashboard";
 import DisplayWeather from "../src/component/DisplayWeather";
+
 interface PrivateRouteProps {
   children: ReactNode;
 }
@@ -46,12 +47,19 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/weather" element={<DisplayWeather />} />
+          <Route
+            path="/weather"
+            element={
+              <PrivateRoute>
+                <DisplayWeather />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/"
             element={
               currentUser ? (
-                <Navigate to="/login" replace />
+                <Navigate to="/weather" replace />
               ) : (
                 <Navigate to="/login" replace />
               )
