@@ -1,4 +1,3 @@
-// src/components/Signup.tsx
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
@@ -26,7 +25,7 @@ function Signup() {
     setError(null);
     try {
       await signInWithPopup(auth, googleProvider);
-      navigate("/login"); // Redirect to dashboard on successful signup
+      navigate("/login");
     } catch (err: any) {
       setError(err.message);
       console.error("Error signing up with Google:", err.message);
