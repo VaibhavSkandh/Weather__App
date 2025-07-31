@@ -10,6 +10,9 @@ import {
   Sunrise,
   Sunset,
   Bookmark,
+  Wind,
+  Thermometer,
+  LogOut 
 } from "lucide-react";
 import { MainWrapper } from "./styles";
 import { db } from "../firebase";
@@ -27,6 +30,8 @@ interface WeatherAPIResponse {
   current: {
     temp_c: number;
     humidity: number;
+    wind_kph: number;
+    feelslike_c: number; 
     condition: {
       text: string;
     };
@@ -176,28 +181,24 @@ const App: React.FC = () => {
   return (
     <MainWrapper>
       <div className="app-container">
-        <div className="weather-card">
-          <div className="search-area">
-            <input
-              type="text"
-              placeholder="Enter a city"
-              value={searchCity}
-              onChange={(e) => setSearchCity(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="search-input"
-            />
-            <button
-              onClick={handleSearch}
-              className="search-button"
-              aria-label="Search weather"
-            >
-              <Search className="icon-search" />
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Sign Out
-            </button>
-          </div>
-
+        <div className="nav-bar">
+          <h1>Weather</h1>
+          <button onClick={handleLogout} className="logout-button">
+            <LogOut className="logout-icon" />
+          </button>
+        </div>
+        <div className="main-area">
+        <div className="search-area">
+          <input
+            type="text"
+            placeholder="Search Location"
+            value={searchCity}
+            onChange={(e) => setSearchCity(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            className="search-input"
+          />
+        </div>
+        <div className="right-section">
           {loading ? (
             <div className="loading-message">
               <p className="loading-text">
@@ -217,47 +218,67 @@ const App: React.FC = () => {
           ) : weatherData ? (
             <>
               <div className="current-weather">
-                <h1 className="city-name">{weatherData.location.name}</h1>
-                <p className="country-name">{weatherData.location.country}</p>
-                <div className="weather-icon-display">
-                  {getIcon(weatherData.current.condition.text)}
+                <div className="save-location-area">
+                  <button
+                    onClick={saveCurrentLocationToFirebase}
+                    className="save-button"
+                    aria-label="Save current location"
+                    disabled={!weatherData}
+                  >
+                  <Bookmark className="icon-save" />
+                  </button>
+                  {saveStatus && (
+                    <p className="save-status-message">{saveStatus}</p>
+                  )}
                 </div>
-                <h1 className="current-temp">
-                  {weatherData.current.temp_c.toFixed(0)}&deg;C
-                </h1>
+                <h1 className="city-name">{weatherData.location.name},</h1>
+                <p className="country-name">{weatherData.location.country}</p>
                 <h2 className="condition-text">
                   {weatherData.current.condition.text}
                 </h2>
-                <p className="humidity-info">
+                <div className="weather-icon-display">
+                  {getIcon(weatherData.current.condition.text)}
+                  <h1 className="current-temp">
+                  {weatherData.current.temp_c.toFixed(0)}&deg;C
+                </h1>
+                </div>
+                
+                
+                <div className="sun-time-section">
+                  <div className="humidity-info">
                   Humidity: {weatherData.current.humidity}%{" "}
                   <Droplet className="icon-humidity" />
-                </p>
-              </div>
-
-              <div className="sun-time-section">
-                <div className="sun-time-item">
-                  <Sunrise className="icon-sunrise" />
-                  <span className="sun-time-label">Sunrise:</span>{" "}
-                  <span className="sun-time-value">
-                    {weatherData.forecast.forecastday[0].astro.sunrise}
-                  </span>
                 </div>
                 <div className="sun-time-item">
+                <span className="icon">🌡️</span> High Temperature: {weatherData.forecast.forecastday[0].day.maxtemp_c.toFixed(1)}&deg;C
+              </div>
+                <div className="sun-time-item">
+                <span className="icon">⬇️</span> Low Temperature: {weatherData.forecast.forecastday[0].day.mintemp_c.toFixed(1)}&deg;C
+              </div>
+              <div className="sun-time-item">
                   <Sunset className="icon-sunset" />
                   <span className="sun-time-label">Sunset:</span>{" "}
                   <span className="sun-time-value">
                     {weatherData.forecast.forecastday[0].astro.sunset}
                   </span>
                 </div>
+                <div className="sun-time-item">
+                  <Sunrise className="icon-sunrise" />
+                  <span className="sun-time-label">Sunrise:</span>{" "}
+                  <span className="sun-time-value">
+                    {weatherData.forecast.forecastday[0].astro.sunrise}
+                  </span>
+                </div>          
+                </div>
               </div>
 
               <div className="forecast-section">
                 <h2 className="forecast-title">
-                  Hourly Forecast (Next 6 Hours)
+                  Today
                 </h2>
                 <div className="hourly-forecast-list">
                   {weatherData.forecast.forecastday[0].hour
-                    .slice(0, 6)
+                    .slice(0, 9)
                     .map((hour, idx) => (
                       <div key={idx} className="hourly-item">
                         <p className="hourly-time">{hour.time.split(" ")[1]}</p>
@@ -270,20 +291,6 @@ const App: React.FC = () => {
                       </div>
                     ))}
                 </div>
-                <div className="save-location-area">
-                  <button
-                    onClick={saveCurrentLocationToFirebase}
-                    className="save-button"
-                    aria-label="Save current location"
-                    disabled={!weatherData}
-                  >
-                    <Bookmark className="icon-save" /> Save Location
-                  </button>
-                  {saveStatus && (
-                    <p className="save-status-message">{saveStatus}</p>
-                  )}
-                </div>
-
                 <h2 className="forecast-title daily-title">
                   Daily Forecast (Next 7 Days)
                 </h2>
@@ -314,6 +321,7 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
+    </div>
     </MainWrapper>
   );
 };
