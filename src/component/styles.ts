@@ -115,6 +115,15 @@ export const MainWrapper = styled.div`
      .weather-icon-display{
       color:white
       }
+      .other-info{    color: white;
+    position: absolute;
+    right: 7.5%;
+    top: 34%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: right;
+}}
    .sun-time-section{
    color: white;
     letter-spacing: 0.6px;
@@ -145,10 +154,13 @@ export const MainWrapper = styled.div`
     }
         }
    .forecast-section{
-  
+  color:white
+  font-weight:100;
+  font-family:Poppins, sans-serif;
    }
    .forecast-title{
    display:block;
+   margin:20px 0px;
    }
    .hourly-forecast-list{
     display: flex;
@@ -208,4 +220,87 @@ export const MainWrapper = styled.div`
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);}}
+.saved-location-list {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.saved-header {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.saved-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  margin-bottom: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+}
+
+.saved-location-button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.delete-saved-button {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+}
+  .saved-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.saved-location-card {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.saved-icon {
+  font-size: 1.2rem;
+}
+
+.saved-temp {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.saved-city {
+  font-weight: 500;
+}
+
+.saved-country {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.delete-saved-button {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  cursor: pointer;
+}
+
+
+
+      
 `;
