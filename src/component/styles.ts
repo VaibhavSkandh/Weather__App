@@ -44,12 +44,25 @@ export const MainWrapper = styled.div`
   font-size:2rem;
 
    }
+  .user-info-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position:absolute;
+  right:3%;
+  padding: 0.4rem 1rem;
+}
+
+.user-name {
+  color: white;
+  font-weight: 500;
+}
+
   .logout-button{
     height:37px;
     width:37px;
     background-color:white;
     position:relative;
-    left:87%;
     border:none;
     border-radius:30px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -118,7 +131,7 @@ export const MainWrapper = styled.div`
       .other-info{    color: white;
     position: absolute;
     right: 7.5%;
-    top: 34%;
+    top: 30%;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -161,6 +174,7 @@ export const MainWrapper = styled.div`
    .forecast-title{
    display:block;
    margin:20px 0px;
+   color:white;
    }
    .hourly-forecast-list{
     display: flex;

@@ -30,6 +30,7 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "../component/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 
 interface WeatherAPIResponse {
   location: {
@@ -99,6 +100,8 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const [savedLocations, setSavedLocations] = useState<any[]>([]);
   const [showSaved, setShowSaved] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+
 
   const fetchWeather = async (query: string) => {
     setLoading(true);
@@ -119,6 +122,21 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+    if (user) {
+      // Prefer display name, else use email prefix
+      const name = user.displayName || user.email?.split("@")[0];
+      setUserName(name || "User");
+    } else {
+      setUserName(null);
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -219,7 +237,6 @@ const App: React.FC = () => {
   );
 
   if (existing) {
-    // ❌ Location is already saved – delete it
     try {
       await deleteDoc(doc(db, "savedLocations", existing.id));
       setSaveStatus(`'${existing.name}' removed from saved locations.`);
@@ -228,7 +245,6 @@ const App: React.FC = () => {
       setSaveStatus("Error removing location. Please try again.");
     }
   } else {
-    // ✅ Location not saved – add it
     try {
       const docRef = await addDoc(collection(db, "savedLocations"), {
         name: weatherData.location.name,
@@ -268,12 +284,16 @@ const App: React.FC = () => {
   return (
     <MainWrapper>
       <div className="app-container">
-        <div className="nav-bar">
-          <h1>Weather</h1>
-          <button onClick={handleLogout} className="logout-button">
-            <LogOut className="logout-icon" />
-          </button>
-        </div>
+       <div className="nav-bar">
+  <h1>Weather</h1>
+  <div className="user-info-area">
+    {userName && <p className="user-name">Hi, {userName}</p>}
+    <button onClick={handleLogout} className="logout-button">
+      <LogOut className="logout-icon" />
+    </button>
+  </div>
+</div>
+
         <div className="main-area">
           <div className="search-area">
             <input
