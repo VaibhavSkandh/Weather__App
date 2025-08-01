@@ -12,7 +12,6 @@ import {
   Wind,
   Thermometer,
   LogOut,
-  List,
   X
 }from "lucide-react";
 import { MainWrapper } from "./styles";
@@ -21,7 +20,6 @@ import {
   collection,
   addDoc,
   serverTimestamp,
-  getDocs,
   doc,
   query,
   orderBy,
@@ -99,7 +97,6 @@ const App: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [savedLocations, setSavedLocations] = useState<any[]>([]);
-  const [showSaved, setShowSaved] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
 
 
