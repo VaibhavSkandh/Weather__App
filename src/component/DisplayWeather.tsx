@@ -107,7 +107,7 @@ const App: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<string>("");
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [savedLocations, setSavedLocations] = useState<any[]>([]);
+  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
