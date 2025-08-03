@@ -12,8 +12,9 @@ import {
   Wind,
   Thermometer,
   LogOut,
-  X
-}from "lucide-react";
+  X,
+  MapPin, // Added MapPin import here
+} from "lucide-react";
 import { MainWrapper } from "./styles";
 import { db } from "../firebase";
 import {
@@ -83,6 +84,16 @@ interface SavedLocation {
   temp?: number;
   condition?: string;
 }
+
+// Interface for search suggestions
+interface SearchSuggestion {
+  id: number;
+  name: string;
+  region: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
 const API_KEY = "95b25569cafd431d8a4164845252707";
 
 const App: React.FC = () => {
@@ -98,7 +109,8 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const [savedLocations, setSavedLocations] = useState<any[]>([]);
   const [userName, setUserName] = useState<string | null>(null);
-
+  const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const fetchWeather = async (query: string) => {
     setLoading(true);
@@ -117,23 +129,45 @@ const App: React.FC = () => {
       );
     } finally {
       setLoading(false);
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
-  useEffect(() => {
-  const auth = getAuth();
-  const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
-    if (user) {
-      // Prefer display name, else use email prefix
-      const name = user.displayName || user.email?.split("@")[0];
-      setUserName(name || "User");
-    } else {
-      setUserName(null);
+  // Function to fetch search suggestions
+  const fetchSuggestions = async (query: string) => {
+    if (query.length < 3) {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      return;
     }
-  });
+    try {
+      const url = `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${query}`;
+      const res = await axios.get<SearchSuggestion[]>(url);
+      setSearchSuggestions(res.data);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error("Error fetching suggestions:", err);
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
 
-  return () => unsubscribe();
-}, []);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        // Prefer display name, else use email prefix
+        const name = user.displayName || user.email?.split("@")[0];
+        setUserName(name || "User");
+      } else {
+        setUserName(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -159,43 +193,49 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-  const unsubscribe = onSnapshot(
-    query(collection(db, "savedLocations"), orderBy("savedAt", "desc")),
-    async (snapshot) => {
-      const locations = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const loc = doc.data() as SavedLocation;
-          const id = doc.id;
-          try {
-            const res = await axios.get(
-              `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${loc.latitude},${loc.longitude}`
-            );
-            return {
-              ...loc,
-              id,
-              temp: res.data.current.temp_c,
-              condition: res.data.current.condition.text,
-            };
-          } catch (error) {
-            console.error("Weather fetch failed for saved location", error);
-            return { ...loc, id };
-          }
-        })
-      );
-      setSavedLocations(locations);
-    }
-  );
+    const unsubscribe = onSnapshot(
+      query(collection(db, "savedLocations"), orderBy("savedAt", "desc")),
+      async (snapshot) => {
+        const locations = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const loc = doc.data() as SavedLocation;
+            const id = doc.id;
+            try {
+              const res = await axios.get(
+                `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${loc.latitude},${loc.longitude}`
+              );
+              return {
+                ...loc,
+                id,
+                temp: res.data.current.temp_c,
+                condition: res.data.current.condition.text,
+              };
+            } catch (error) {
+              console.error("Weather fetch failed for saved location", error);
+              return { ...loc, id };
+            }
+          })
+        );
+        setSavedLocations(locations);
+      }
+    );
 
-  return () => unsubscribe();
-}, []);
-
+    return () => unsubscribe();
+  }, []);
 
   const handleSearch = () => {
     if (searchCity.trim() !== "") {
       fetchWeather(searchCity);
-      setSearchCity("");
     }
   };
+
+  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+    const query = `${suggestion.name}`;
+    setSearchCity(query);
+    fetchWeather(query);
+    setShowSuggestions(false);
+  };
+
 
   const getIcon = (text: string) => {
     const condition = text.toLowerCase();
@@ -221,52 +261,52 @@ const App: React.FC = () => {
       return <Sun className="icon-main text-yellow-500" />;
     return <Sun className="icon-main text-yellow-500" />;
   };
- const toggleSaveLocation = async () => {
-  if (!weatherData) {
-    setSaveStatus("No weather data to save.");
-    return;
-  }
-
-  const existing = savedLocations.find(
-    (loc) =>
-      loc.name === weatherData.location.name &&
-      loc.country === weatherData.location.country
-  );
-
-  if (existing) {
-    try {
-      await deleteDoc(doc(db, "savedLocations", existing.id));
-      setSaveStatus(`'${existing.name}' removed from saved locations.`);
-    } catch (e) {
-      console.error("Error removing location: ", e);
-      setSaveStatus("Error removing location. Please try again.");
+  const toggleSaveLocation = async () => {
+    if (!weatherData) {
+      setSaveStatus("No weather data to save.");
+      return;
     }
-  } else {
-    try {
-      const docRef = await addDoc(collection(db, "savedLocations"), {
-        name: weatherData.location.name,
-        country: weatherData.location.country,
-        latitude: weatherData.location.lat,
-        longitude: weatherData.location.lon,
-        savedAt: serverTimestamp(),
-      });
-      setSaveStatus(`'${weatherData.location.name}' saved!`);
-    } catch (e) {
-      console.error("Error saving location: ", e);
-      setSaveStatus("Error saving location. Please try again.");
+
+    const existing = savedLocations.find(
+      (loc) =>
+        loc.name === weatherData.location.name &&
+        loc.country === weatherData.location.country
+    );
+
+    if (existing) {
+      try {
+        await deleteDoc(doc(db, "savedLocations", existing.id));
+        setSaveStatus(`'${existing.name}' removed from saved locations.`);
+      } catch (e) {
+        console.error("Error removing location: ", e);
+        setSaveStatus("Error removing location. Please try again.");
+      }
+    } else {
+      try {
+        const docRef = await addDoc(collection(db, "savedLocations"), {
+          name: weatherData.location.name,
+          country: weatherData.location.country,
+          latitude: weatherData.location.lat,
+          longitude: weatherData.location.lon,
+          savedAt: serverTimestamp(),
+        });
+        setSaveStatus(`'${weatherData.location.name}' saved!`);
+      } catch (e) {
+        console.error("Error saving location: ", e);
+        setSaveStatus("Error saving location. Please try again.");
+      }
     }
-  }
-};
+  };
 
 
   const deleteSavedLocation = async (id: string) => {
-  try {
-    await deleteDoc(doc(db, "savedLocations", id));
-    setSavedLocations((prev) => prev.filter((loc) => loc.id !== id));
-  } catch (error) {
-    console.error("Error deleting location:", error);
-  }
-};
+    try {
+      await deleteDoc(doc(db, "savedLocations", id));
+      setSavedLocations((prev) => prev.filter((loc) => loc.id !== id));
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    }
+  };
 
 
   const handleLogout = async () => {
@@ -281,54 +321,71 @@ const App: React.FC = () => {
   return (
     <MainWrapper>
       <div className="app-container">
-       <div className="nav-bar">
-  <h1>Weather</h1>
-  <div className="user-info-area">
-    {userName && <p className="user-name">Hi, {userName}</p>}
-    <button onClick={handleLogout} className="logout-button">
-      <LogOut className="logout-icon" />
-    </button>
-  </div>
-</div>
-
+        <div className="nav-bar">
+          <h1>Weather</h1>
+          <div className="user-info-area">
+            {userName && <p className="user-name">Hi, {userName}</p>}
+            <button onClick={handleLogout} className="logout-button">
+              <LogOut className="logout-icon" />
+            </button>
+          </div>
+        </div>
         <div className="main-area">
           <div className="search-area">
-            <input
-              type="text"
-              placeholder="Search Location"
-              value={searchCity}
-              onChange={(e) => setSearchCity(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="search-input"/>
-              {savedLocations.length > 0 && (
-  <div className="saved-location-list">
-    <h4 className="saved-header">Saved Locations</h4>
-    {savedLocations.map((loc) => (
-  <div key={loc.id} className="saved-item">
-    <div
-      className="saved-location-card"
-      onClick={() => fetchWeather(`${loc.latitude},${loc.longitude}`)}
-    >
-      <span className="saved-icon">{getIcon(loc.condition || "")}</span>
-      <span className="saved-temp">
-        {loc.temp !== undefined ? `${loc.temp.toFixed(1)}°` : "--"}
-      </span>
-      <span className="saved-city">
-        {loc.name}, <span className="saved-country">{loc.country}</span>
-      </span>
-    </div>
-    <button
-      className="delete-saved-button"
-      onClick={() => deleteSavedLocation(loc.id)}
-    >
-      <X className="icon-delete" />
-    </button>
-  </div>
-))}
-
-  </div>
-)}
-
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                placeholder="Search Location"
+                value={searchCity}
+                onChange={(e) => {
+                  setSearchCity(e.target.value);
+                  fetchSuggestions(e.target.value);
+                }}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                className="search-input"
+              />
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <ul className="search-dropdown">
+                  {searchSuggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.id}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      <MapPin size={16} className="suggestion-icon" />
+                      <span>{suggestion.name}, {suggestion.country}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {savedLocations.length > 0 && (
+              <div className="saved-location-list">
+                <h4 className="saved-header">Saved Locations</h4>
+                {savedLocations.map((loc) => (
+                  <div key={loc.id} className="saved-item">
+                    <div
+                      className="saved-location-card"
+                      onClick={() => fetchWeather(`${loc.latitude},${loc.longitude}`)}
+                    >
+                      <span className="saved-icon">{getIcon(loc.condition || "")}</span>
+                      <span className="saved-temp">
+                        {loc.temp !== undefined ? `${loc.temp.toFixed(1)}°` : "--"}
+                      </span>
+                      <span className="saved-city">
+                        {loc.name}, <span className="saved-country">{loc.country}</span>
+                      </span>
+                    </div>
+                    <button
+                      className="delete-saved-button"
+                      onClick={() => deleteSavedLocation(loc.id)}
+                    >
+                      <X className="icon-delete" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="right-section">
             {loading ? (
@@ -466,4 +523,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

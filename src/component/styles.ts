@@ -100,6 +100,19 @@ export const MainWrapper = styled.div`
         color: rgba(255, 255, 255, 0.7); 
         opacity: 1;
 }
+        .search-dropdown {
+  max-height: 100px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 9px;
+  border: 1px solid #555;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  position: absolute;
+  width: 62%;
+  z-index: 10;
+}
     .right-section{    
     background-color: #0000001a;
     border: 1px solid #ffffff4d;
