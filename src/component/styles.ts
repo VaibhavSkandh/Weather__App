@@ -331,3 +331,75 @@ export const MainWrapper = styled.div`
 
       
 `;
+export const Container = styled.div`
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background-color: #fff;
+`;
+
+export const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+`;
+
+export const Input = styled.input`
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+`;
+
+export const Button = styled.button<{ variant?: "google" | "danger" }>`
+  padding: 10px 15px;
+  border-radius: 4px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  color: white;
+
+  background-color: ${({ variant }) =>
+    variant === "google"
+      ? "#dd4b39"
+      : variant === "danger"
+      ? "#dc3545"
+      : "#007bff"};
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+export const LinkText = styled.p`
+  margin-top: 20px;
+  font-size: 14px;
+`;
+
+export const StyledLink = styled.a`
+  color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+export const ErrorText = styled.p`
+  color: red;
+  margin-top: 10px;
+`;
+
+export const ProfilePic = styled.img`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 15px 0;
+  object-fit: cover;
+`;

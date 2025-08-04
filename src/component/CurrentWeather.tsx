@@ -7,7 +7,6 @@ import {
   Sunrise,
   Bookmark,
 } from "lucide-react";
-import {} from "../component/styles"
 
 interface Props {
   location: {
