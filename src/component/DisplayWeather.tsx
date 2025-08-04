@@ -1,21 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Droplet,
-  Sun,
-  Cloud,
-  CloudRain,
-  CloudFog,
-  Sunrise,
-  Sunset,
-  Bookmark,
-  Wind,
-  Thermometer,
-  LogOut,
-  X,
-  MapPin, // Added MapPin import here
-} from "lucide-react";
-import { MainWrapper } from "./styles";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { useAuth } from "../component/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import {
   collection,
@@ -25,27 +12,30 @@ import {
   query,
   orderBy,
   deleteDoc,
-  onSnapshot
+  onSnapshot,
 } from "firebase/firestore";
-import { useAuth } from "../component/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { MainWrapper } from "./styles";
+
+// Components
+import Header from "../component/Header";
+import SearchBar from "../component/SearchBar";
+import SavedLocations from "../component/SavedLocations";
+import CurrentWeather from "../component/CurrentWeather";
+import Forecast from "../component/Forecast";
+
+// Icons
+import { Cloud, CloudFog, CloudRain, Sun } from "lucide-react";
+
+const API_KEY = "95b25569cafd431d8a4164845252707";
 
 interface WeatherAPIResponse {
-  location: {
-    name: string;
-    country: string;
-    lat: number;
-    lon: number;
-  };
+  location: { name: string; country: string; lat: number; lon: number };
   current: {
     temp_c: number;
     humidity: number;
     wind_kph: number;
     feelslike_c: number;
-    condition: {
-      text: string;
-    };
+    condition: { text: string };
   };
   forecast: {
     forecastday: {
@@ -53,80 +43,64 @@ interface WeatherAPIResponse {
       day: {
         maxtemp_c: number;
         mintemp_c: number;
-        condition: {
-          text: string;
-        };
+        condition: { text: string };
       };
       hour: {
         time: string;
         temp_c: number;
-        condition: {
-          text: string;
-        };
+        condition: { text: string };
       }[];
-      astro: {
-        sunrise: string;
-        sunset: string;
-      };
+      astro: { sunrise: string; sunset: string };
     }[];
   };
 }
+
 interface SavedLocation {
   id: string;
   name: string;
   country: string;
   latitude: number;
   longitude: number;
-  savedAt: {
-    seconds: number;
-    nanoseconds: number;
-  };
+  savedAt: { seconds: number; nanoseconds: number };
   temp?: number;
   condition?: string;
 }
 
-// Interface for search suggestions
 interface SearchSuggestion {
   id: number;
   name: string;
-  region: string;
   country: string;
   lat: number;
   lon: number;
 }
-const API_KEY = "95b25569cafd431d8a4164845252707";
 
-const App: React.FC = () => {
-  const [weatherData, setWeatherData] = useState<WeatherAPIResponse | null>(
-    null
-  );
-  const [city, setCity] = useState("");
+const DisplayWeather: React.FC = () => {
+  const [weatherData, setWeatherData] = useState<WeatherAPIResponse | null>(null);
   const [searchCity, setSearchCity] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<string>("");
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
-  const [userName, setUserName] = useState<string | null>(null);
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]);
+  const [saveStatus, setSaveStatus] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
 
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Fetch weather
   const fetchWeather = async (query: string) => {
     setLoading(true);
     setError(null);
     setSaveStatus("");
     try {
-      const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=no&alerts=no`;
-      const res = await axios.get<WeatherAPIResponse>(url);
-      setWeatherData(res.data);
-      setCity(res.data.location.name);
-    } catch (err) {
-      console.error("Error fetching weather data:", err);
-      setWeatherData(null);
-      setError(
-        "Could not fetch weather data. Please try again or enter a city name."
+      const res = await axios.get(
+        `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${query}&days=7&aqi=no&alerts=no`
       );
+      setWeatherData(res.data);
+    } catch (err) {
+      setError("Could not fetch weather data. Try again.");
+      setWeatherData(null);
     } finally {
       setLoading(false);
       setSearchSuggestions([]);
@@ -134,156 +108,33 @@ const App: React.FC = () => {
     }
   };
 
-  // Function to fetch search suggestions
   const fetchSuggestions = async (query: string) => {
-    if (query.length < 3) {
-      setSearchSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
+    if (query.length < 3) return setShowSuggestions(false);
     try {
-      const url = `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${query}`;
-      const res = await axios.get<SearchSuggestion[]>(url);
+      const res = await axios.get(
+        `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${query}`
+      );
       setSearchSuggestions(res.data);
       setShowSuggestions(true);
-    } catch (err) {
-      console.error("Error fetching suggestions:", err);
+    } catch {
       setSearchSuggestions([]);
       setShowSuggestions(false);
     }
   };
 
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
-      if (user) {
-        // Prefer display name, else use email prefix
-        const name = user.displayName || user.email?.split("@")[0];
-        setUserName(name || "User");
-      } else {
-        setUserName(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          fetchWeather(`${latitude},${longitude}`);
-        },
-        (geoError) => {
-          console.error("Error getting geolocation:", geoError);
-          setError(
-            "Geolocation denied or unavailable. Falling back to default city."
-          );
-          fetchWeather("Bengaluru");
-        }
-      );
-    } else {
-      setError(
-        "Geolocation is not supported by your browser. Falling back to default city."
-      );
-      fetchWeather("Bengaluru");
-    }
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(
-      query(collection(db, "savedLocations"), orderBy("savedAt", "desc")),
-      async (snapshot) => {
-        const locations = await Promise.all(
-          snapshot.docs.map(async (doc) => {
-            const loc = doc.data() as SavedLocation;
-            const id = doc.id;
-            try {
-              const res = await axios.get(
-                `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${loc.latitude},${loc.longitude}`
-              );
-              return {
-                ...loc,
-                id,
-                temp: res.data.current.temp_c,
-                condition: res.data.current.condition.text,
-              };
-            } catch (error) {
-              console.error("Weather fetch failed for saved location", error);
-              return { ...loc, id };
-            }
-          })
-        );
-        setSavedLocations(locations);
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleSearch = () => {
-    if (searchCity.trim() !== "") {
-      fetchWeather(searchCity);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-    const query = `${suggestion.name}`;
-    setSearchCity(query);
-    fetchWeather(query);
-    setShowSuggestions(false);
-  };
-
-
-  const getIcon = (text: string) => {
-    const condition = text.toLowerCase();
-    if (
-      condition.includes("rain") ||
-      condition.includes("drizzle") ||
-      condition.includes("showers")
-    )
-      return <CloudRain className="icon-main text-blue-600" />;
-    if (
-      condition.includes("cloud") ||
-      condition.includes("overcast") ||
-      condition.includes("partly cloudy")
-    )
-      return <Cloud className="icon-main text-gray-500" />;
-    if (condition.includes("fog") || condition.includes("mist"))
-      return <CloudFog className="icon-main text-gray-400" />;
-    if (
-      condition.includes("sun") ||
-      condition.includes("clear") ||
-      condition.includes("sunny")
-    )
-      return <Sun className="icon-main text-yellow-500" />;
-    return <Sun className="icon-main text-yellow-500" />;
-  };
-  const toggleSaveLocation = async () => {
-    if (!weatherData) {
-      setSaveStatus("No weather data to save.");
-      return;
-    }
-
+  const handleToggleSave = async () => {
+    if (!weatherData) return setSaveStatus("No weather data to save.");
     const existing = savedLocations.find(
       (loc) =>
         loc.name === weatherData.location.name &&
         loc.country === weatherData.location.country
     );
-
-    if (existing) {
-      try {
+    try {
+      if (existing) {
         await deleteDoc(doc(db, "savedLocations", existing.id));
-        setSaveStatus(`'${existing.name}' removed from saved locations.`);
-      } catch (e) {
-        console.error("Error removing location: ", e);
-        setSaveStatus("Error removing location. Please try again.");
-      }
-    } else {
-      try {
-        const docRef = await addDoc(collection(db, "savedLocations"), {
+        setSaveStatus(`'${existing.name}' removed.`);
+      } else {
+        await addDoc(collection(db, "savedLocations"), {
           name: weatherData.location.name,
           country: weatherData.location.country,
           latitude: weatherData.location.lat,
@@ -291,228 +142,153 @@ const App: React.FC = () => {
           savedAt: serverTimestamp(),
         });
         setSaveStatus(`'${weatherData.location.name}' saved!`);
-      } catch (e) {
-        console.error("Error saving location: ", e);
-        setSaveStatus("Error saving location. Please try again.");
       }
+    } catch {
+      setSaveStatus("Error saving/removing location.");
     }
   };
 
-
-  const deleteSavedLocation = async (id: string) => {
+  const handleDeleteSavedLocation = async (id: string) => {
     try {
       await deleteDoc(doc(db, "savedLocations", id));
       setSavedLocations((prev) => prev.filter((loc) => loc.id !== id));
-    } catch (error) {
-      console.error("Error deleting location:", error);
+    } catch {
+      console.error("Error deleting location");
     }
   };
 
+  const getIcon = (text: string) => {
+    const lower = text.toLowerCase();
+    if (lower.includes("rain") || lower.includes("drizzle") || lower.includes("shower")) return <CloudRain className="icon-main text-blue-600" />;
+    if (lower.includes("cloud") || lower.includes("overcast")) return <Cloud className="icon-main text-gray-500" />;
+    if (lower.includes("fog") || lower.includes("mist")) return <CloudFog className="icon-main text-gray-400" />;
+    if (lower.includes("sun") || lower.includes("clear")) return <Sun className="icon-main text-yellow-500" />;
+    return <Sun className="icon-main text-yellow-500" />;
+  };
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate("/login");
-    } catch (err: any) {
-      console.error("Error logging out:", err.message);
+    } catch (err) {
+      console.error("Logout failed");
     }
   };
+
+  const handleSearch = () => {
+    if (searchCity.trim()) fetchWeather(searchCity);
+  };
+
+  const handleSuggestionClick = (sugg: SearchSuggestion) => {
+    setSearchCity(sugg.name);
+    fetchWeather(sugg.name);
+    setShowSuggestions(false);
+  };
+
+  // Effects
+  useEffect(() => {
+    const auth = getAuth();
+    const unsub = onAuthStateChanged(auth, (user: User | null) => {
+      const name = user?.displayName || user?.email?.split("@")[0];
+      setUserName(name ?? "User");
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    navigator.geolocation?.getCurrentPosition(
+      ({ coords }) => fetchWeather(`${coords.latitude},${coords.longitude}`),
+      () => {
+        setError("Geolocation denied. Using default.");
+        fetchWeather("Bengaluru");
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, "savedLocations"), orderBy("savedAt", "desc"));
+    const unsub = onSnapshot(q, async (snapshot) => {
+      const updated = await Promise.all(snapshot.docs.map(async (docSnap) => {
+        const loc = docSnap.data() as SavedLocation;
+        try {
+          const res = await axios.get(
+            `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${loc.latitude},${loc.longitude}`
+          );
+          return {
+            ...loc,
+            id: docSnap.id,
+            temp: res.data.current.temp_c,
+            condition: res.data.current.condition.text,
+          };
+        } catch {
+          return { ...loc, id: docSnap.id };
+        }
+      }));
+      setSavedLocations(updated);
+    });
+    return () => unsub();
+  }, []);
 
   return (
     <MainWrapper>
       <div className="app-container">
-        <div className="nav-bar">
-          <h1>Weather</h1>
-          <div className="user-info-area">
-            {userName && <p className="user-name">Hi, {userName}</p>}
-            <button onClick={handleLogout} className="logout-button">
-              <LogOut className="logout-icon" />
-            </button>
-          </div>
-        </div>
+        <Header userName={userName} onLogout={handleLogout} />
+
         <div className="main-area">
           <div className="search-area">
-            <div className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="Search Location"
-                value={searchCity}
-                onChange={(e) => {
-                  setSearchCity(e.target.value);
-                  fetchSuggestions(e.target.value);
-                }}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="search-input"
-              />
-              {showSuggestions && searchSuggestions.length > 0 && (
-                <ul className="search-dropdown">
-                  {searchSuggestions.map((suggestion) => (
-                    <li
-                      key={suggestion.id}
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <MapPin size={16} className="suggestion-icon" />
-                      <span>{suggestion.name}, {suggestion.country}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            {savedLocations.length > 0 && (
-              <div className="saved-location-list">
-                <h4 className="saved-header">Saved Locations</h4>
-                {savedLocations.map((loc) => (
-                  <div key={loc.id} className="saved-item">
-                    <div
-                      className="saved-location-card"
-                      onClick={() => fetchWeather(`${loc.latitude},${loc.longitude}`)}
-                    >
-                      <span className="saved-icon">{getIcon(loc.condition || "")}</span>
-                      <span className="saved-temp">
-                        {loc.temp !== undefined ? `${loc.temp.toFixed(1)}°` : "--"}
-                      </span>
-                      <span className="saved-city">
-                        {loc.name}, <span className="saved-country">{loc.country}</span>
-                      </span>
-                    </div>
-                    <button
-                      className="delete-saved-button"
-                      onClick={() => deleteSavedLocation(loc.id)}
-                    >
-                      <X className="icon-delete" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <SearchBar
+              value={searchCity}
+              onChange={(val) => {
+                setSearchCity(val);
+                fetchSuggestions(val);
+              }}
+              onSearch={handleSearch}
+              suggestions={searchSuggestions}
+              showSuggestions={showSuggestions}
+              onSuggestionClick={handleSuggestionClick}
+            />
+
+            <SavedLocations
+              locations={savedLocations}
+              onSelect={(lat, lon) => fetchWeather(`${lat},${lon}`)}
+              onDelete={handleDeleteSavedLocation}
+              getIcon={getIcon}
+            />
           </div>
+
           <div className="right-section">
             {loading ? (
               <div className="loading-message">
-                <p className="loading-text">
-                  Detecting your location and fetching weather...
-                </p>
-                <p className="loading-subtext">
-                  Please allow location access if prompted.
-                </p>
+                <p className="loading-text">Fetching weather data...</p>
               </div>
             ) : error ? (
               <div className="error-message">
                 <p className="error-text">{error}</p>
-                <p className="error-subtext">
-                  You can try searching for a city manually above.
-                </p>
               </div>
             ) : weatherData ? (
               <>
-                <div className="current-weather">
-                  <div className="save-location-area">
-                    <button  onClick={toggleSaveLocation}
-                              className="save-button"
-                              aria-label="Save or remove current location">
-                    <Bookmark className="icon-save" />
-                    </button>
-
-                    {saveStatus && (
-                      <p className="save-status-message">{saveStatus}</p>
-                    )}
-                  </div>
-                  <h1 className="city-name">{weatherData.location.name},</h1>
-                  <p className="country-name">{weatherData.location.country}</p>
-                  <h2 className="condition-text">
-                    {weatherData.current.condition.text}
-                  </h2>
-                  <div className="weather-icon-display">
-                    {getIcon(weatherData.current.condition.text)}
-                    <h1 className="current-temp">
-                      {weatherData.current.temp_c.toFixed(0)}&deg;C
-                    </h1>
-                  </div>
-                  <div className="other-info">
-                    <div className="wind-info">
-                      <Wind className="icon-Wind" />
-                      Wind:{weatherData.current.wind_kph}kmph{" "}
-                    </div>
-                    <div className="humidity-info">
-                      <Droplet className="icon-humidity" />
-                      Humidity: {weatherData.current.humidity}%{" "}
-                    </div>
-                  </div>
-                  <div className="sun-time-section">
-                    <div className="sun-time-item">
-                      <Thermometer className="icon thermometer"/>High Temperature:{" "}
-                      {weatherData.forecast.forecastday[0].day.maxtemp_c.toFixed(1)}&deg;C
-                    </div>
-                    <div className="sun-time-item">
-                      <span className="icon">⬇️</span> Low Temperature:{" "}
-                      {weatherData.forecast.forecastday[0].day.mintemp_c.toFixed(
-                        1
-                      )}
-                      &deg;C
-                    </div>
-                    <div className="sun-time-item">
-                      <Sunset className="icon-sunset" />
-                      <span className="sun-time-label">Sunset:</span>{" "}
-                      <span className="sun-time-value">
-                        {weatherData.forecast.forecastday[0].astro.sunset}
-                      </span>
-                    </div>
-                    <div className="sun-time-item">
-                      <Sunrise className="icon-sunrise" />
-                      <span className="sun-time-label">Sunrise:</span>{" "}
-                      <span className="sun-time-value">
-                        {weatherData.forecast.forecastday[0].astro.sunrise}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="forecast-section">
-                  <h2 className="forecast-title">Today</h2>
-                  <div className="hourly-forecast-list">
-                    {weatherData.forecast.forecastday[0].hour
-                      .slice(0, 9)
-                      .map((hour, idx) => (
-                        <div key={idx} className="hourly-item">
-                          <p className="hourly-time">
-                            {hour.time.split(" ")[1]}
-                          </p>
-                          <div className="hourly-icon">
-                            {getIcon(hour.condition.text)}
-                          </div>
-                          <p className="hourly-temp">
-                            {hour.temp_c.toFixed(0)}&deg;C
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                  <h2 className="forecast-title daily-title">
-                    Daily Forecast (Next 7 Days)
-                  </h2>
-                  <div className="daily-forecast-list">
-                    {weatherData.forecast.forecastday
-                      .slice(0, 7)
-                      .map((day, idx) => (
-                        <div key={idx} className="daily-item">
-                          <p className="daily-date">{day.date}</p>
-                          <div className="daily-icon">
-                            {getIcon(day.day.condition.text)}
-                          </div>
-                          <p className="daily-temp">
-                            {day.day.mintemp_c.toFixed(0)}&deg; /{" "}
-                            {day.day.maxtemp_c.toFixed(0)}&deg;C
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+                <CurrentWeather
+                  location={weatherData.location}
+                  current={weatherData.current}
+                  forecast={{
+                    sunrise: weatherData.forecast.forecastday[0].astro.sunrise,
+                    sunset: weatherData.forecast.forecastday[0].astro.sunset,
+                    maxtemp_c: weatherData.forecast.forecastday[0].day.maxtemp_c,
+                    mintemp_c: weatherData.forecast.forecastday[0].day.mintemp_c,
+                  }}
+                  saveStatus={saveStatus}
+                  onToggleSave={handleToggleSave}
+                  getIcon={getIcon}
+                />
+                <Forecast
+                  hourly={weatherData.forecast.forecastday[0].hour}
+                  daily={weatherData.forecast.forecastday}
+                  getIcon={getIcon}
+                />
               </>
             ) : (
               <div className="loading-message">
-                <p className="loading-text">
-                  Enter a city to get weather information.
-                </p>
+                <p className="loading-text">Enter a city to see weather data.</p>
               </div>
             )}
           </div>
@@ -522,4 +298,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default DisplayWeather;
