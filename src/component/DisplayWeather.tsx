@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { MainWrapper } from "./styles";
 
 // Hooks
@@ -30,17 +30,27 @@ const DisplayWeather: React.FC = () => {
   const { userName, logout } = useAuthStatus();
   const { weatherData, loading, error, fetchWeather } = useWeather();
   const { savedLocations, saveStatus, handleToggleSave, handleDeleteSavedLocation } = useSavedLocations();
-  const { searchCity, setSearchCity, searchSuggestions, showSuggestions, fetchSuggestions } = useSearchSuggestions();
+  const {
+    searchCity,
+    setSearchCity,
+    searchSuggestions,
+    fetchSuggestions,
+  } = useSearchSuggestions();
+
+  // New state to manage the visibility of the suggestions
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleSearch = () => {
     if (searchCity.trim()) {
       fetchWeather(searchCity);
+      setShowSuggestions(false); // Hide suggestions after a search
     }
   };
 
   const handleSuggestionClick = (sugg: { name: string; lat: number; lon: number }) => {
     setSearchCity(sugg.name);
     fetchWeather(sugg.name);
+    setShowSuggestions(false); // Hide suggestions after a suggestion is clicked
   };
   
   const toggleSaveCurrentLocation = () => {
@@ -61,11 +71,13 @@ const DisplayWeather: React.FC = () => {
               onChange={(val) => {
                 setSearchCity(val);
                 fetchSuggestions(val);
+                setShowSuggestions(val.length > 0); // Show suggestions when there's input
               }}
               onSearch={handleSearch}
               suggestions={searchSuggestions}
               showSuggestions={showSuggestions}
               onSuggestionClick={handleSuggestionClick}
+              onHideSuggestions={() => setShowSuggestions(false)} // Pass a function to hide suggestions
             />
 
             <SavedLocations

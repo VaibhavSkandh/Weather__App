@@ -30,7 +30,7 @@ export const Hourly_item = styled.div`
     padding: 15px 5px;
     text-align: center;
     display: flex;
-    height:75px;
+    height:5rem;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -68,7 +68,7 @@ export const Daily_item = styled.div`
     padding: 15px 5px;
     text-align: center;
     display: flex;
-    height:75px;
+    height:5rem;
     margin:15px;
     flex-direction: column;
     justify-content: space-between;

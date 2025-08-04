@@ -17,6 +17,7 @@ interface Props {
   suggestions: SearchSuggestion[];
   onSuggestionClick: (sugg: SearchSuggestion) => void;
   showSuggestions: boolean;
+  onHideSuggestions: () => void; // Add a new prop to handle hiding suggestions
 }
 
 const SearchBar: React.FC<Props> = ({
@@ -26,7 +27,13 @@ const SearchBar: React.FC<Props> = ({
   suggestions,
   onSuggestionClick,
   showSuggestions,
+  onHideSuggestions, // Destructure the new prop
 }) => {
+  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+    onSuggestionClick(suggestion);
+    onHideSuggestions(); // Call the new function to hide the suggestions
+  };
+
   return (
     <Search_input_wrapper>
       <Search_input
@@ -41,7 +48,7 @@ const SearchBar: React.FC<Props> = ({
           {suggestions.map((suggestion) => (
             <Suggestion_item
               key={suggestion.id}
-              onClick={() => onSuggestionClick(suggestion)}
+              onClick={() => handleSuggestionClick(suggestion)}
             >
               <Suggestion_icon>
                 <MapPin size={16} />
