@@ -1,5 +1,16 @@
 import React from "react";
 import { X } from "lucide-react";
+import {
+  Saved_location_list,
+  Saved_header,
+  Saved_item,
+  Saved_location_card,
+  Saved_icon,
+  Saved_temp,
+  Saved_city,
+  Saved_country,
+  Delete_saved_button,
+} from "../styles/SavedLocations.module";
 
 interface SavedLocation {
   id: string;
@@ -27,31 +38,27 @@ const SavedLocations: React.FC<Props> = ({
   if (locations.length === 0) return null;
 
   return (
-    <div className="saved-location-list">
-      <h4 className="saved-header">Saved Locations</h4>
+    <Saved_location_list>
+      <Saved_header>Saved Locations</Saved_header>
       {locations.map((loc) => (
-        <div key={loc.id} className="saved-item">
-          <div
-            className="saved-location-card"
+        <Saved_item key={loc.id}>
+          <Saved_location_card
             onClick={() => onSelect(loc.latitude, loc.longitude)}
           >
-            <span className="saved-icon">{getIcon(loc.condition || "")}</span>
-            <span className="saved-temp">
+            <Saved_icon>{getIcon(loc.condition || "")}</Saved_icon>
+            <Saved_temp>
               {loc.temp !== undefined ? `${loc.temp.toFixed(1)}°` : "--"}
-            </span>
-            <span className="saved-city">
-              {loc.name}, <span className="saved-country">{loc.country}</span>
-            </span>
-          </div>
-          <button
-            className="delete-saved-button"
-            onClick={() => onDelete(loc.id)}
-          >
+            </Saved_temp>
+            <Saved_city>
+              {loc.name}, <Saved_country>{loc.country}</Saved_country>
+            </Saved_city>
+          </Saved_location_card>
+          <Delete_saved_button onClick={() => onDelete(loc.id)}>
             <X className="icon-delete" />
-          </button>
-        </div>
+          </Delete_saved_button>
+        </Saved_item>
       ))}
-    </div>
+    </Saved_location_list>
   );
 };
 

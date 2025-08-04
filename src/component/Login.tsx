@@ -1,8 +1,8 @@
 // Login.tsx
 import React, { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, AuthError } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Form,
@@ -12,6 +12,11 @@ import {
   LinkText,
   StyledLink,
 } from "../component/styles";
+
+// A simple type guard to check for Firebase Auth errors
+const isAuthError = (err: unknown): err is AuthError => {
+  return typeof err === 'object' && err !== null && 'code' in err && typeof (err as { code: string }).code === 'string';
+};
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -25,8 +30,13 @@ function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/weather");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (isAuthError(err)) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+        console.error(err);
+      }
     }
   };
 
@@ -35,8 +45,13 @@ function Login() {
     try {
       await signInWithPopup(auth, googleProvider);
       navigate("/weather");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (isAuthError(err)) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+        console.error(err);
+      }
     }
   };
 
@@ -65,7 +80,7 @@ function Login() {
       </Button>
       {error && <ErrorText>{error}</ErrorText>}
       <LinkText>
-        Don't have an account? <StyledLink as={Link} to="/signup">Sign Up</StyledLink>
+        Don't have an account? <StyledLink to="/signup">Sign Up</StyledLink>
       </LinkText>
     </Container>
   );

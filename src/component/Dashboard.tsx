@@ -38,7 +38,7 @@ function Dashboard() {
         </div>
       ) : (
         <p>
-          You are not logged in. Please <StyledLink href="/login">login</StyledLink>.
+          You are not logged in. Please <StyledLink to="/login">login</StyledLink>.
         </p>
       )}
     </Container>

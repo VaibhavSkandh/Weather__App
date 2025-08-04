@@ -1,5 +1,6 @@
 import React from "react";
 import { LogOut } from "lucide-react";
+import { Nav_bar, User_info_area, User_name, Logout_button,Title} from "../styles/Header.module";
 
 interface Props {
   userName: string | null;
@@ -8,15 +9,15 @@ interface Props {
 
 const Header: React.FC<Props> = ({ userName, onLogout }) => {
   return (
-    <div className="nav-bar">
-      <h1>Weather</h1>
-      <div className="user-info-area">
-        {userName && <p className="user-name">Hi, {userName}</p>}
-        <button onClick={onLogout} className="logout-button">
+    <Nav_bar>
+      <Title>Weather</Title>
+      <User_info_area>
+        {userName && <User_name>Hi, {userName}</User_name>}
+        <Logout_button onClick={onLogout}>
           <LogOut className="logout-icon" />
-        </button>
-      </div>
-    </div>
+        </Logout_button>
+      </User_info_area>
+    </Nav_bar>
   );
 };
 

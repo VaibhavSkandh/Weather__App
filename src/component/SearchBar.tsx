@@ -1,12 +1,13 @@
 import React from "react";
 import { MapPin } from "lucide-react";
+import { Search_input_wrapper, Search_input, Search_dropdown, Suggestion_item, Suggestion_icon } from "../styles/SearchBar.module";
 
 interface SearchSuggestion {
   id: number;
   name: string;
   country: string;
-  lat:number;
-  lon:number;
+  lat: number;
+  lon: number;
 }
 
 interface Props {
@@ -27,30 +28,32 @@ const SearchBar: React.FC<Props> = ({
   showSuggestions,
 }) => {
   return (
-    <div className="search-input-wrapper">
-      <input
+    <Search_input_wrapper>
+      <Search_input
         type="text"
         value={value}
         placeholder="Search Location"
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && onSearch()}
-        className="search-input"
       />
       {showSuggestions && suggestions.length > 0 && (
-        <ul className="search-dropdown">
+        <Search_dropdown>
           {suggestions.map((suggestion) => (
-            <li
+            <Suggestion_item
               key={suggestion.id}
-              className="suggestion-item"
               onClick={() => onSuggestionClick(suggestion)}
             >
-              <MapPin size={16} className="suggestion-icon" />
-              <span>{suggestion.name}, {suggestion.country}</span>
-            </li>
+              <Suggestion_icon>
+                <MapPin size={16} />
+              </Suggestion_icon>
+              <span>
+                {suggestion.name}, {suggestion.country}
+              </span>
+            </Suggestion_item>
           ))}
-        </ul>
+        </Search_dropdown>
       )}
-    </div>
+    </Search_input_wrapper>
   );
 };
 
