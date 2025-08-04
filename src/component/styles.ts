@@ -4,7 +4,7 @@ export const MainWrapper = styled.div`
 *{
   margin:0px;
   padding:0px;
-  box-sizing:
+  box-sizing:border-box;
   }
   .app-container{
     
@@ -21,7 +21,7 @@ export const MainWrapper = styled.div`
     padding: 40px;
     position:absolute;
     top:20%;
-    width:202vb;
+    width:213vb;
     }
   .nav-bar{
     background-color: #0000004d;
@@ -33,7 +33,7 @@ export const MainWrapper = styled.div`
     border-radius: 2rem;
     padding: 3rem;
     transition: transform .3s ease, box-shadow .3s ease;
-    width:91%;
+    width:97%;
     height:20px;
     align-items:center;
     color:white;
@@ -120,7 +120,7 @@ export const MainWrapper = styled.div`
     box-shadow: 0 10px 15px #0000001a;
     padding: 3rem;
     transition: transform .3s ease, box-shadow .3s ease;
-    width: 61%;
+    width: 74%;
     }
    .current-weather{
      border-bottom: 1px solid grey;
@@ -198,6 +198,7 @@ export const MainWrapper = styled.div`
     scroll-padding: 0;
     scrollbar-width: none;
     width: 100%;
+    height:7rem;
     }
     .hourly-item{ 
     color:white;   
@@ -228,6 +229,7 @@ export const MainWrapper = styled.div`
     scroll-padding: 0;
     scrollbar-width: none;
     width: 100%;
+    height:7rem;
     }
     .daily-item{
     color:white;   
