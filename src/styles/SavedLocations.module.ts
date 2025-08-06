@@ -16,11 +16,11 @@ export const Saved_item = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
   background: #ffffff1a;
   border-radius: 1rem;
   margin-bottom: 10px;
   border: 1px solid #ffffff4d;
+  height:71px;
 `;
 
 export const Saved_location_card = styled.div`

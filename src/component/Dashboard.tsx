@@ -17,8 +17,13 @@ function Dashboard() {
     try {
       await logout();
       navigate("/login");
-    } catch (err: any) {
-      console.error("Error logging out:", err.message);
+    } catch (err) {
+      // Use an explicit error type to ensure type safety
+      if (err instanceof Error) {
+        console.error("Error logging out:", err.message);
+      } else {
+        console.error("An unknown error occurred during logout.");
+      }
     }
   };
 

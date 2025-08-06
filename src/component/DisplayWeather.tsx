@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { MainWrapper } from "./styles";
+import {
+  AppContainer,
+  MainArea,
+  SearchArea,
+  RightSection
+} from "./styles";
 
 // Hooks
 import useAuthStatus from "../hooks/useAuthStatus";
@@ -60,73 +65,71 @@ const DisplayWeather: React.FC = () => {
   };
 
   return (
-    <MainWrapper>
-      <div className="app-container">
-        <Header userName={userName} onLogout={logout} />
+    <AppContainer>
+      <Header userName={userName} onLogout={logout} />
 
-        <div className="main-area">
-          <div className="search-area">
-            <SearchBar
-              value={searchCity}
-              onChange={(val) => {
-                setSearchCity(val);
-                fetchSuggestions(val);
-                setShowSuggestions(val.length > 0); // Show suggestions when there's input
-              }}
-              onSearch={handleSearch}
-              suggestions={searchSuggestions}
-              showSuggestions={showSuggestions}
-              onSuggestionClick={handleSuggestionClick}
-              onHideSuggestions={() => setShowSuggestions(false)} // Pass a function to hide suggestions
-            />
+      <MainArea>
+        <SearchArea>
+          <SearchBar
+            value={searchCity}
+            onChange={(val) => {
+              setSearchCity(val);
+              fetchSuggestions(val);
+              setShowSuggestions(val.length > 0); // Show suggestions when there's input
+            }}
+            onSearch={handleSearch}
+            suggestions={searchSuggestions}
+            showSuggestions={showSuggestions}
+            onSuggestionClick={handleSuggestionClick}
+            onHideSuggestions={() => setShowSuggestions(false)} // Pass a function to hide suggestions
+          />
 
-            <SavedLocations
-              locations={savedLocations}
-              onSelect={(lat, lon) => fetchWeather(`${lat},${lon}`)}
-              onDelete={handleDeleteSavedLocation}
-              getIcon={getIcon}
-            />
-          </div>
+          <SavedLocations
+            locations={savedLocations}
+            onSelect={(lat, lon) => fetchWeather(`${lat},${lon}`)}
+            onDelete={handleDeleteSavedLocation}
+            getIcon={getIcon}
+          />
+        </SearchArea>
 
-          <div className="right-section">
-            {loading ? (
-              <div className="loading-message">
-                <p className="loading-text">Fetching weather data...</p>
-              </div>
-            ) : error ? (
-              <div className="error-message">
-                <p className="error-text">{error}</p>
-              </div>
-            ) : weatherData ? (
-              <>
-                <CurrentWeather
-                  location={weatherData.location}
-                  current={weatherData.current}
-                  forecast={{
-                    sunrise: weatherData.forecast.forecastday[0].astro.sunrise,
-                    sunset: weatherData.forecast.forecastday[0].astro.sunset,
-                    maxtemp_c: weatherData.forecast.forecastday[0].day.maxtemp_c,
-                    mintemp_c: weatherData.forecast.forecastday[0].day.mintemp_c,
-                  }}
-                  saveStatus={saveStatus}
-                  onToggleSave={toggleSaveCurrentLocation}
-                  getIcon={getIcon}
-                />
-                <Forecast
-                  hourly={weatherData.forecast.forecastday[0].hour}
-                  daily={weatherData.forecast.forecastday}
-                  getIcon={getIcon}
-                />
-              </>
-            ) : (
-              <div className="loading-message">
-                <p className="loading-text">Enter a city to see weather data.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </MainWrapper>
+        <RightSection>
+          {loading ? (
+            <div className="loading-message">
+              <p className="loading-text">Fetching weather data...</p>
+            </div>
+          ) : error ? (
+            <div className="error-message">
+              <p className="error-text">{error}</p>
+            </div>
+          ) : weatherData ? (
+            <>
+              <CurrentWeather
+                location={weatherData.location}
+                current={weatherData.current}
+                forecast={{
+                  sunrise: weatherData.forecast.forecastday[0].astro.sunrise,
+                  sunset: weatherData.forecast.forecastday[0].astro.sunset,
+                  maxtemp_c: weatherData.forecast.forecastday[0].day.maxtemp_c,
+                  mintemp_c: weatherData.forecast.forecastday[0].day.mintemp_c,
+                }}
+                saveStatus={saveStatus}
+                onToggleSave={toggleSaveCurrentLocation}
+                getIcon={getIcon}
+              />
+              <Forecast
+                hourly={weatherData.forecast.forecastday[0].hour}
+                daily={weatherData.forecast.forecastday}
+                getIcon={getIcon}
+              />
+            </>
+          ) : (
+            <div className="loading-message">
+              <p className="loading-text">Enter a city to see weather data.</p>
+            </div>
+          )}
+        </RightSection>
+      </MainArea>
+    </AppContainer>
   );
 };
 

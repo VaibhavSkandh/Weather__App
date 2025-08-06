@@ -2,18 +2,19 @@
 import styled from "styled-components";
 
 export const Nav_bar = styled.div`
-  background-color: #0000004d;
-  position: absolute;
-  margin: 21px;
-  display: flex;
-  flex-direction: row;
-  border: 1px solid #ffffff4d;
-  border-radius: 2rem;
-  padding: 3rem;
-  width: 97%;
-  height: 20px;
-  align-items: center;
-  color: white;
+ background-color: #0000004d;
+    position: absolute;
+    margin: 21px;
+    display: flex;
+    flex-direction: row;
+    border: 1px solid #ffffff4d;
+    border-radius: 2rem;
+    padding: 3rem;
+    width: 90%;
+    height: 20px;
+    align-items: center;
+    color: white;
+    top: 0px;
 `;
 
 export const User_info_area = styled.div`

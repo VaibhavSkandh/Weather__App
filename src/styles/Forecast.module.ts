@@ -19,7 +19,7 @@ export const Hourly_list = styled.div`
     scroll-padding: 0;
     scrollbar-width: none;
     width: 100%;
-    height:7rem;
+    height:10rem;
 `
 export const Hourly_item = styled.div`
   color:white;   
@@ -30,7 +30,7 @@ export const Hourly_item = styled.div`
     padding: 15px 5px;
     text-align: center;
     display: flex;
-    height:5rem;
+    height:6rem;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -58,7 +58,7 @@ export const Daily_forecast_list = styled.div`
     scroll-padding: 0;
     scrollbar-width: none;
     width: 100%;
-    height:7rem;
+    height:9rem;
 `
 export const Daily_item = styled.div`
     color:white;   
@@ -68,7 +68,7 @@ export const Daily_item = styled.div`
     padding: 15px 5px;
     text-align: center;
     display: flex;
-    height:5rem;
+    height:6rem;
     margin:15px;
     flex-direction: column;
     justify-content: space-between;

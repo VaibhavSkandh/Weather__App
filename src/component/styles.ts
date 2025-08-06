@@ -2,137 +2,159 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-export const MainWrapper = styled.div`
-  *{
-    margin:0px;
-    padding:0px;
-    box-sizing:border-box;
-  }
-  .app-container{
-    
-  }
-  .main-area{
-    grid-gap: 20px;
-    -webkit-backdrop-filter: blur(3px);
-    backdrop-filter: blur(3px);
-    background: #0000004d;
-    border-radius: 3rem;
-    box-shadow: 0 8px 20px #0000001a;
-    display: flex;
-    margin: 1rem;
-    padding: 40px;
-    position:absolute;
-    top:20%;
-    width:213vb;
-  }
- 
-  .search-area{
-    background-color: #0000001a;
-    border: 1px solid #ffffff4d;
-    border-radius: 2rem;
-    box-shadow: 0 10px 15px #0000001a;
-    display: flex;
-    flex-direction: column;
-    position:relative;
-    top:10%;
-    padding: 20px 30px;
-    transition: all .3s ease;
-    width: 25%;
-  }
-  .search-input{
-    height:4rem;
-    padding-left:5rem;
-    border-radius:30px;
-    background-color:#0000004d;
-    border:none;
-    color:black;
-    font-size: 16px;
-  }
-  .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.7); 
+// -------------------------------------------------------------
+// Component-specific styles
+// -------------------------------------------------------------
+
+// Main Layout
+export const AppContainer = styled.div`
+  /* Styles for the main app container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+`;
+
+export const MainArea = styled.div`
+  display: grid;
+  grid-gap: 20px;
+  backdrop-filter: blur(3px);
+  background: #0000004d;
+  border-radius: 3rem;
+  box-shadow: 0 8px 20px #0000001a;
+  display: flex;
+  margin: 1rem;
+  padding: 40px;
+  position: absolute;
+  top: 20%;
+  width: 90vw; /* Replaced 'vb' with 'vw' */
+`;
+
+// Search Section
+export const SearchArea = styled.div`
+  background-color: #0000001a;
+  border: 1px solid #ffffff4d;
+  border-radius: 2rem;
+  box-shadow: 0 10px 15px #0000001a;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  top: 10%;
+  padding: 20px 30px;
+  transition: all 0.3s ease;
+  width: 25%;
+`;
+
+export const SearchInput = styled.input`
+  height: 4rem;
+  padding-left: 5rem;
+  border-radius: 30px;
+  background-color: #0000004d;
+  border: none;
+  color: black;
+  font-size: 16px;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.7);
     opacity: 1;
   }
-  .search-dropdown {
-    max-height: 100px;
-    overflow-y: auto;
-    list-style: none;
-    padding: 0;
-    margin: 9px;
-    border: 1px solid #555;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    position: absolute;
-    width: 62%;
-    z-index: 10;
-  }
-  .right-section{    
-    background-color: #0000001a;
-    border: 1px solid #ffffff4d;
-    border-radius: 2rem;
-    box-shadow: 0 10px 15px #0000001a;
-    padding: 3rem;
-    transition: transform .3s ease, box-shadow .3s ease;
-    width: 74%;
-  }
-  .current-weather{
-    border-bottom: 1px solid grey;
-    height:40vh;
-    width:auto;
-  } 
-  .city-name{
-    color:white;
-    font-size:50px;
-    font-weight:100;
-  }
-  .country-name{
-    color:white;
-  }
-  .condition-text{
-    color:#fff9;
-  }
-  .weather-icon-display{
-    color:white
-  }
-  .other-info{    
-    color: white;
-    position: absolute;
-    right: 7.5%;
-    top: 30%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: right;
-  }
-  .sun-time-section{
-    color: white;
-    letter-spacing: 0.6px;
-    display: flex;
-    margin: 30px 0px;
-    justify-content: space-between;
-    overflow-y: auto;
-    flex-wrap: wrap;
-    flex-direction: row-reverse;
-    align-content: space-around;
-    align-items: baseline;
-  }
-  .save-button{
-    position:relative;
-    top:10%;
-    left:94%;
-    height:30px;
-    width:30px;
-    border-radius:30px;
-    background-color:transparent;
-    border:none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    &:hover {
-      transform: translateY(-3px);
-      background-color:rgba(245, 239, 239, 1);
-      opacity:0.5;
-      box-shadow: 0 5px 15px rgba(162, 155, 155, 0.18);
-    }
+`;
+
+export const SearchDropdown = styled.ul`
+  max-height: 100px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 9px;
+  border: 1px solid #555;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  position: absolute;
+  width: 62%;
+  z-index: 10;
+`;
+
+// Right-hand content section
+export const RightSection = styled.div`
+  background-color: #0000001a;
+  border: 1px solid #ffffff4d;
+  border-radius: 2rem;
+  box-shadow: 0 10px 15px #0000001a;
+  padding: 3rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 68%;
+`;
+
+// Current Weather Details
+export const CurrentWeather = styled.div`
+  border-bottom: 1px solid grey;
+  height: 40vh;
+  width: auto;
+`;
+
+export const CityName = styled.h2`
+  color: white;
+  font-size: 50px;
+  font-weight: 100;
+`;
+
+export const CountryName = styled.p`
+  color: white;
+`;
+
+export const ConditionText = styled.p`
+  color: #fff9;
+`;
+
+export const WeatherIconDisplay = styled.div`
+  color: white;
+`;
+
+export const OtherInfo = styled.div`
+  color: white;
+  position: absolute;
+  right: 7.5%;
+  top: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: right;
+`;
+
+export const SunTimeSection = styled.div`
+  color: white;
+  letter-spacing: 0.6px;
+  display: flex;
+  margin: 30px 0px;
+  justify-content: space-between;
+  overflow-y: auto;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  align-content: space-around;
+  align-items: baseline;
+`;
+
+export const SaveButton = styled.button`
+  position: relative;
+  top: 10%;
+  left: 94%;
+  height: 30px;
+  width: 30px;
+  border-radius: 30px;
+  background-color: transparent;
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    background-color: rgba(245, 239, 239, 1);
+    opacity: 0.5;
+    box-shadow: 0 5px 15px rgba(162, 155, 155, 0.18);
   }
 `;
+
+// Re-usable base components
 export const Container = styled.div`
   max-width: 600px;
   margin: 50px auto;
@@ -166,7 +188,6 @@ export const Button = styled.button<{ variant?: "google" | "danger" }>`
   cursor: pointer;
   margin-top: 10px;
   color: white;
-
   background-color: ${({ variant }) =>
     variant === "google"
       ? "#dd4b39"
@@ -204,4 +225,15 @@ export const ProfilePic = styled.img`
   border-radius: 50%;
   margin: 15px 0;
   object-fit: cover;
+`;
+
+// Global styles (optional, but good for base resets)
+// Can be used in a separate 'globalStyles.ts' file and imported.
+export const GlobalStyles = styled.div`
+  /* A simple reset without the global selector */
+  &, * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 `;

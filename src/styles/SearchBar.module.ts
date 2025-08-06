@@ -7,7 +7,7 @@ export const Search_input_wrapper = styled.div`
 `;
 
 export const Search_input = styled.input`
-  width: 100%;
+  width: 86%;
   padding: 10px 15px;
   border-radius: 1rem;
   border: none;
