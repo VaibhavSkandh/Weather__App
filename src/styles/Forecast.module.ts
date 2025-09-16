@@ -1,16 +1,18 @@
 import styled from "styled-components";
-export const FC_Section = styled.div`
-    color:white
+
+export const FcSection = styled.div`
+    color:white;
     font-weight:100;
     font-family:Poppins, sans-serif;
 `;
 
-export const FC_Title = styled.h2`
+export const FcTitle = styled.h2`
   display:block;
   margin:20px 0px;
   color:white;
-`
-export const Hourly_list = styled.div`
+`;
+
+export const HourlyList = styled.div`
   display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -20,8 +22,9 @@ export const Hourly_list = styled.div`
     scrollbar-width: none;
     width: 100%;
     height:10rem;
-`
-export const Hourly_item = styled.div`
+`;
+
+export const HourlyItem = styled.div`
   color:white;   
     margin:20px;
     flex: 0 0 100px;
@@ -40,16 +43,19 @@ export const Hourly_item = styled.div`
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
-`
-export const Hourly_time =styled.p`
+`;
+
+export const HourlyTime = styled.p`
   font-size: 14px;
   opacity: 0.8;
-`
-export const Hourly_temp = styled.p`
+`;
+
+export const HourlyTemp = styled.p`
   font-size: 18px;
   font-weight: bold;
-`
-export const Daily_forecast_list = styled.div`
+`;
+
+export const DailyForecastList = styled.div`
    display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -59,8 +65,9 @@ export const Daily_forecast_list = styled.div`
     scrollbar-width: none;
     width: 100%;
     height:9rem;
-`
-export const Daily_item = styled.div`
+`;
+
+export const DailyItem = styled.div`
     color:white;   
     flex: 0 0 100px;
     background-color: rgba(255, 255, 255, 0.15);
@@ -79,5 +86,17 @@ export const Daily_item = styled.div`
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
-`
-export default {FC_Section,FC_Title,Hourly_item,Hourly_time,Hourly_list,Daily_forecast_list,Daily_item,Hourly_temp}
+`;
+
+const ForecastModuleStyles = {
+  FcSection,
+  FcTitle,
+  HourlyItem,
+  HourlyTime,
+  HourlyList,
+  DailyForecastList,
+  DailyItem,
+  HourlyTemp
+};
+
+export default ForecastModuleStyles;

@@ -1,12 +1,12 @@
 import {
-  FC_Section,
-  FC_Title,
-  Hourly_item,
-  Hourly_time,
-  Hourly_list,
-  Daily_forecast_list,
-  Daily_item,
-  Hourly_temp,
+  FcSection,
+  FcTitle,
+  HourlyItem,
+  HourlyTime,
+  HourlyList,
+  DailyForecastList,
+  DailyItem,
+  HourlyTemp,
 } from "../styles/Forecast.module";
 import React from "react";
 
@@ -29,32 +29,32 @@ interface ForecastProps {
 
 const Forecast: React.FC<ForecastProps> = ({ hourly, daily, getIcon }) => {
   return (
-    <FC_Section>
-      <FC_Title>Today</FC_Title>
-      <Hourly_list>
+    <FcSection>
+      <FcTitle>Today</FcTitle>
+      <HourlyList>
         {hourly.slice(0, 9).map((hour, idx) => (
-          <Hourly_item key={idx}>
-            <Hourly_time>{hour.time.split(" ")[1]}</Hourly_time>
+          <HourlyItem key={idx}>
+            <HourlyTime>{hour.time.split(" ")[1]}</HourlyTime>
             <div className="hourly-icon">{getIcon(hour.condition.text)}</div>
-            <Hourly_temp>{hour.temp_c.toFixed(0)}°C</Hourly_temp>
-          </Hourly_item>
+            <HourlyTemp>{hour.temp_c.toFixed(0)}°C</HourlyTemp>
+          </HourlyItem>
         ))}
-      </Hourly_list>
+      </HourlyList>
 
       {/* Daily */}
-      <FC_Title>Daily Forecast (Next 7 Days)</FC_Title>
-      <Daily_forecast_list>
+      <FcTitle>Daily Forecast (Next 7 Days)</FcTitle>
+      <DailyForecastList>
         {daily.slice(0, 7).map((day, idx) => (
-          <Daily_item key={idx}>
+          <DailyItem key={idx}>
             <p className="daily-date">{day.date}</p>
             <div className="daily-icon">{getIcon(day.day.condition.text)}</div>
             <p className="daily-temp">
               {day.day.mintemp_c.toFixed(0)}° / {day.day.maxtemp_c.toFixed(0)}°C
             </p>
-          </Daily_item>
+          </DailyItem>
         ))}
-      </Daily_forecast_list>
-    </FC_Section>
+      </DailyForecastList>
+    </FcSection>
   );
 };
 

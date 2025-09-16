@@ -1,12 +1,12 @@
 // SearchBar.module.ts
 import styled from "styled-components";
 
-export const Search_input_wrapper = styled.div`
+export const SearchInputWrapper = styled.div`
   position: relative;
   width: 100%;
 `;
 
-export const Search_input = styled.input`
+export const SearchInput = styled.input`
   width: 86%;
   padding: 10px 15px;
   border-radius: 1rem;
@@ -16,7 +16,7 @@ export const Search_input = styled.input`
   font-size: 16px;
 `;
 
-export const Search_dropdown = styled.ul`
+export const SearchDropdown = styled.ul`
   position: absolute;
   top: 100%;
   left: 0;
@@ -32,7 +32,7 @@ export const Search_dropdown = styled.ul`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
-export const Suggestion_item = styled.li`
+export const SuggestionItem = styled.li`
   padding: 10px 15px;
   cursor: pointer;
   display: flex;
@@ -40,8 +40,16 @@ export const Suggestion_item = styled.li`
   gap: 10px;
 `;
 
-export const Suggestion_icon = styled.div`
+export const SuggestionIcon = styled.div`
   color: #666;
 `;
 
-export default { Search_input_wrapper, Search_input, Search_dropdown, Suggestion_item, Suggestion_icon };
+const SearchBarModuleStyles = { 
+  SearchInputWrapper, 
+  SearchInput, 
+  SearchDropdown, 
+  SuggestionItem, 
+  SuggestionIcon 
+};
+
+export default SearchBarModuleStyles;

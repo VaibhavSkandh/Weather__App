@@ -1,7 +1,7 @@
 // Dashboard.tsx
 import React from "react";
 import { useAuth } from "../component/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Button,

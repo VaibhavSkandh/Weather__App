@@ -1,6 +1,6 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { Search_input_wrapper, Search_input, Search_dropdown, Suggestion_item, Suggestion_icon } from "../styles/SearchBar.module";
+import { SearchInputWrapper, SearchInput, SearchDropdown, SuggestionItem, SuggestionIcon } from "../styles/SearchBar.module";
 
 interface SearchSuggestion {
   id: number;
@@ -35,8 +35,8 @@ const SearchBar: React.FC<Props> = ({
   };
 
   return (
-    <Search_input_wrapper>
-      <Search_input
+    <SearchInputWrapper>
+      <SearchInput
         type="text"
         value={value}
         placeholder="Search Location"
@@ -44,23 +44,23 @@ const SearchBar: React.FC<Props> = ({
         onKeyDown={(e) => e.key === "Enter" && onSearch()}
       />
       {showSuggestions && suggestions.length > 0 && (
-        <Search_dropdown>
+        <SearchDropdown>
           {suggestions.map((suggestion) => (
-            <Suggestion_item
+            <SuggestionItem
               key={suggestion.id}
               onClick={() => handleSuggestionClick(suggestion)}
             >
-              <Suggestion_icon>
+              <SuggestionIcon>
                 <MapPin size={16} />
-              </Suggestion_icon>
+              </SuggestionIcon>
               <span>
                 {suggestion.name}, {suggestion.country}
               </span>
-            </Suggestion_item>
+            </SuggestionItem>
           ))}
-        </Search_dropdown>
+        </SearchDropdown>
       )}
-    </Search_input_wrapper>
+    </SearchInputWrapper>
   );
 };
 
